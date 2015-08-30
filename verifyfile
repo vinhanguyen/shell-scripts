@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# verify file using hash
+
+# check usage
+if (($# != 2)) || [ ! -e "$1" ]; then
+  echo "Usage: $0 file hash" >&2
+  exit 1
+fi
+
+# determine hash type based on length
+if ((${#2} == 32)); then
+  echo "Checking md5..."
+  if [ "$(md5sum $1 | cut -d ' ' -f 1)" != "$2" ]; then
+    echo "Fail"
+    exit 1
+  else
+    echo "Success!!"
+  fi
+elif ((${#2} == 64)); then
+  echo "Checking sha256..."
+  if [ "$(sha256sum $1 | cut -d ' ' -f 1)" != "$2" ]; then
+    echo "Fail"
+    exit 1
+  else
+    echo "Success!!"
+  fi
+else
+  echo "Unknown hash type" >&2
+  exit 1
+fi
