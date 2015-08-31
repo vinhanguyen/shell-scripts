@@ -17,9 +17,25 @@ if ((${#2} == 32)); then
   else
     echo "Success!!"
   fi
+elif ((${#2} == 40)); then
+  echo "Checking sha1..."
+  if [ "$(sha1sum $1 | cut -d ' ' -f 1)" != "$2" ]; then
+    echo "Fail"
+    exit 1
+  else
+    echo "Success!!"
+  fi
 elif ((${#2} == 64)); then
   echo "Checking sha256..."
   if [ "$(sha256sum $1 | cut -d ' ' -f 1)" != "$2" ]; then
+    echo "Fail"
+    exit 1
+  else
+    echo "Success!!"
+  fi
+elif ((${#2} == 128)); then
+  echo "Checking sha512..."
+  if [ "$(sha512sum $1 | cut -d ' ' -f 1)" != "$2" ]; then
     echo "Fail"
     exit 1
   else
