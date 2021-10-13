@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if (($# == 2)); then
+  out=${2}.gif
+else
+  out=${1%.webm}.gif
+fi
+
+ffmpeg -i $1 -pix_fmt rgb24 $out
+
