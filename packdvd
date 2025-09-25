@@ -1,0 +1,42 @@
+if [ "$#" -lt 2 ]; then
+    echo "Usage: packdvd <dir> <ext1> [ext2 ... extN]"
+    exit 1
+fi
+
+dir=$1
+dir="${dir%/}"
+if [ ! -d "$dir" ]; then
+    echo "$dir is not a directory."
+    exit 1
+fi
+
+shift
+exts=("$@")
+
+files=()
+for ext in "${exts[@]}"; do
+    for file in "$dir"/*."$ext"; do
+        [ -e "$file" ] || continue
+        files+=("$file")
+    done
+done
+
+file_size=()
+while IFS= read -r file; do
+    bytes=$(stat -c%s "$file")
+    file_size+=("${file}|${bytes}")
+done < <(printf "%s\n" "${files[@]}" | sort -V)
+
+
+free=4700000000
+burn=()
+for line in "${file_size[@]}"; do
+    IFS='|' read -r file size <<< "$line"
+
+    if [ "$size" -lt $free ]; then
+        burn+=("$file")
+        free=$((free - size))
+    fi
+done
+
+brasero -d "${burn[@]}" > /dev/null 2>&1 &
