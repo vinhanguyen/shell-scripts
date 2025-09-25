@@ -1,0 +1,33 @@
+DIR="$1"
+DIR="${DIR%/}"
+
+if [[ ! -d "$DIR" ]]; then
+  echo "Usage: rename_img /path/to/directory"
+  exit 1
+fi
+
+imgs=()
+for img in "$DIR"/IMG_*; do
+    recorded_date=$(mediainfo --Inform="General;%Recorded_Date%" "$img")
+    imgs+=("$recorded_date|$img")
+done
+
+sorted_imgs=()
+while IFS= read -r line; do
+    sorted_imgs+=("$line")
+done < <(printf "%s\n" "${imgs[@]}" | sort)
+
+for item in "${sorted_imgs[@]}"; do
+    IFS='|' read -r datetime file <<< "$item"
+    date="${datetime%%T*}"
+    ext="${file##*.}"
+    name="${DIR}/${date}.${ext}"
+
+    i=1
+    while [[ -e "$name" ]]; do
+        name="${DIR}/${date}-$i.${ext}"
+        ((i++))
+    done
+
+    mv "$file" "$name"
+done
